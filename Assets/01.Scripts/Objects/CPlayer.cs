@@ -50,11 +50,11 @@ public class CPlayer : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        CWeaponInfo cWeaponInfo = new CWeaponInfo();
-        cWeaponInfo.SetDamage(0, DefineData.TEST_MY_WEAPON_MIN);
-        cWeaponInfo.SetDamage(1, DefineData.TEST_MY_WEAPON_MAX);
+        // CWeaponInfo cWeaponInfo = new CWeaponInfo();
+        // cWeaponInfo.SetDamage(0, DefineData.TEST_MY_WEAPON_MIN);
+        // cWeaponInfo.SetDamage(1, DefineData.TEST_MY_WEAPON_MAX);
 
-        m_cCharacterInfo = new CCharacterInfo(0, DefineData.MY_LEVEL, cWeaponInfo);
+        // m_cCharacterInfo = new CCharacterInfo(0, DefineData.MY_LEVEL, cWeaponInfo);
 
         // StartCoroutine("ProcessPlay");
         // m_aniPlayer.Play("Entry");
@@ -125,6 +125,7 @@ public class CPlayer : MonoBehaviour
             fRate = 0.05f;  // 최소 확률
         if(fRate > 0.95)
             fRate = 0.95f; // 최대 확률
+
 
         float fRandomRate = Random.Range(0, 1f);
 

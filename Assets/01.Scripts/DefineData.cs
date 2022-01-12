@@ -1,21 +1,32 @@
 static class DefineData
 {
     public static float TEST_CRITICAL_RATE = 0.5f;
-    public static int TEST_MY_WEAPON_MIN = 10;
-    public static int TEST_MY_WEAPON_MAX = 30;
 
-    public static int TEST_ENEMY_WEAPON_MIN = 400;
-    public static int TEST_ENEMY_WEAPON_MAX = 500;
-    
+    public static int TEST_FLOOR = 3;
+    public static int TEST_MY_WEAPON_INDEX = 1;
 
+    public static int TEST_ENEMY_WEAPON_INDEX = 1;
 
     public static int MY_LEVEL = 30;
-    public static int ENEMY_LEVEL = 100;
+    public static int ENEMY_LEVEL = 1;
 
     // Game Setting ----
     public static float FIGHT_DISTANCE = 1.5f;
     public static float RUN_SPEED = 3f;
     // -----------------
+
+    // UI Borad --------
+    public static int UI_INGAME_BOARD_DEV = 0;
+    public static int UI_INGAME_BOARD_PLAYING = 1;
+    // -----------------
+
+    // InGame State ----
+    public static int INGAME_READY = 0;
+    public static int INGAME_PLAY = 1;
+    // -----------------
+
+    public static int CHARACTER_TYPE_PLAYER = 0;
+    public static int CHARACTER_TYPE_ENEMY = 10;
 
 
     public static int STATE_READY = 0;

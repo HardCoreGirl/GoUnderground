@@ -10,6 +10,8 @@ public class CCharacter : MonoBehaviour
 
     public Animator m_aniCharacter;
 
+    private int m_nCharacterType = 0;
+
     private GameObject m_goTarget;
 
     CCharacterInfo m_cCharacterInfo;
@@ -26,11 +28,23 @@ public class CCharacter : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        CWeaponInfo cWeaponInfo = new CWeaponInfo();
-        cWeaponInfo.SetDamage(0, DefineData.TEST_MY_WEAPON_MIN);
-        cWeaponInfo.SetDamage(1, DefineData.TEST_MY_WEAPON_MAX);
+       
 
-        m_cCharacterInfo = new CCharacterInfo(0, DefineData.MY_LEVEL, cWeaponInfo, m_nAniType);
+        // m_strSkill01AniName = "m_strSkill01AniName";
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        
+    }
+
+    public void InitCharacter(int nType, int nUnitIndex, int nLevel, int nHP, CWeaponEX cWeaponEX)
+    {
+        // CWeaponInfo cWeaponInfo = CGameInfo.Instance.GetWeaponInfo(DefineData.TEST_MY_WEAPON_INDEX);
+        m_nCharacterType = nType;
+
+        m_cCharacterInfo = new CCharacterInfo(nUnitIndex, nLevel, nHP, cWeaponEX, m_nAniType);
 
         // m_strRunAniName = "Run_Standard";
         m_strRunAniName = "Run_SwordShield";
@@ -42,14 +56,6 @@ public class CCharacter : MonoBehaviour
             m_strAttackAniName = "Slash_SwordShield";
             m_strHitAniName = "Hit_SwordShield";
         }
-
-        // m_strSkill01AniName = "m_strSkill01AniName";
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 
     #region Character Data -----
@@ -129,6 +135,7 @@ public class CCharacter : MonoBehaviour
 
     public bool IsAttack()
     {
+        int nLevel = m_goTarget.GetComponent<CCharacter>().GetLevel();
 
         float fRate = (float)m_cCharacterInfo.GetLevel() / ((float)m_cCharacterInfo.GetLevel() + (float)m_goTarget.GetComponent<CCharacter>().GetLevel()) * ((GetAttackRate() + 100) / 100);
 
@@ -210,7 +217,26 @@ public class CCharacter : MonoBehaviour
                     if( bIsCritical )
                         fDamage = GetCriticalDamage(fDamage);
 
-                    m_goTarget.GetComponent<CCharacter>().Hit(this.gameObject, 100, bIsCritical);
+                    
+
+                    if( m_goTarget.GetComponent<CCharacter>().Hit(this.gameObject, fDamage, bIsCritical) == 1 )
+                    {
+                        if( m_nCharacterType == DefineData.CHARACTER_TYPE_PLAYER )
+                        {
+                            int nTarget = CEnemysManager.Instance.NextTarget(m_goCharacter.transform.position);
+                            if( nTarget == -1 )
+                            {
+                                // 클리어
+                                Debug.Log("Game Clear !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                                break;
+                            }
+                            SetTarget(CEnemysManager.Instance.GetEnemyGameObject(nTarget));
+                        }
+                        // 상대방이 죽었다면
+                        yield return new WaitForSeconds(GetAttackFinishInterval());
+                        Run();
+                        break;
+                    }
                 }
                 else 
                 {
@@ -241,7 +267,7 @@ public class CCharacter : MonoBehaviour
         // StartCoroutine("ProcessAttack");
     }
 
-    public void Hit(GameObject goAttacker, float fDamage, bool bIsCritical = false)
+    public int Hit(GameObject goAttacker, float fDamage, bool bIsCritical = false)
     {
         float fHP = m_cCharacterInfo.Damage(fDamage);
 
@@ -249,6 +275,13 @@ public class CCharacter : MonoBehaviour
             CUIInGameManager.Instance.ShowPopupMsgByWorld(this.gameObject.transform.position, fDamage.ToString(), 101);
         else
             CUIInGameManager.Instance.ShowPopupMsgByWorld(this.gameObject.transform.position, fDamage.ToString(), 100);
+
+        if( fHP <= 0 )
+        {
+            Debug.Log("Dead!!!!!!!!!!!!!!!!");
+            Dead();
+            return 1;
+        }
 
         if( GetState() == DefineData.STATE_READY )
         {
@@ -260,6 +293,8 @@ public class CCharacter : MonoBehaviour
             StopCoroutine("ProcessAttack");
             StartCoroutine("ProcessHit");
         }
+
+        return 0;
     }
 
     IEnumerator ProcessHit()
@@ -316,6 +351,12 @@ public class CCharacter : MonoBehaviour
         m_aniCharacter.Play("Idle");
 
         Attack();
+    }
+
+    public void Dead()
+    {
+        StopCoroutine("ProcessAttack");
+        m_aniCharacter.Play("Death");
     }
 
     public float Heal(float fHeal)

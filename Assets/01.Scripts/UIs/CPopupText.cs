@@ -26,8 +26,9 @@ public class CPopupText : MonoBehaviour
 
     public void Play()
     {
-        var txtDisplay = GetComponent<Text>();
+        Text txtDisplay = GetComponent<Text>();
         txtDisplay.DOFade(0f, 1.0f);
+        // txtDisplay.material.DOFade(0f, 1.0f);
         transform.DOPunchScale(Vector3.one * 0.5f, 0.5f);
 
         if( m_nType < 100 )

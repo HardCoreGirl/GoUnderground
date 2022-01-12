@@ -14,11 +14,11 @@ public class CEnemy : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        CWeaponInfo cWeaponInfo = new CWeaponInfo();
-        cWeaponInfo.SetDamage(0, DefineData.TEST_ENEMY_WEAPON_MIN);
-        cWeaponInfo.SetDamage(1, DefineData.TEST_ENEMY_WEAPON_MAX);
+        CWeaponInfo cWeaponInfo = new CWeaponInfo(1, 0, 1, 1, 1);
+        // cWeaponInfo.SetDamage(0, DefineData.TEST_ENEMY_WEAPON_MIN);
+        // cWeaponInfo.SetDamage(1, DefineData.TEST_ENEMY_WEAPON_MAX);
 
-        m_cCharacterInfo = new CCharacterInfo(1000, DefineData.ENEMY_LEVEL, cWeaponInfo);
+        // m_cCharacterInfo = new CCharacterInfo(1000, DefineData.ENEMY_LEVEL, cWeaponInfo);
 
         Debug.Log("Load Enemy");
     }

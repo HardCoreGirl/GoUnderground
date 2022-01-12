@@ -40,27 +40,46 @@ public class CEnemysManager : MonoBehaviour
 
     int m_nEnemyCount = 0;
 
+    private int m_nTargetEnemyIndex = 0;
+
     // Start is called before the first frame update
     void Start()
     {
-        m_nEnemyCount = Random.Range(5, m_arrEnemy.Length);
-
-        for(int i = 0; i < m_nEnemyCount; i++)
-        {
-            m_arrEnemy[i] = Instantiate(Resources.Load<GameObject>("Prefabs/Enemys/enemys"));
-            m_arrEnemy[i].transform.parent = m_goEnemyRoot.transform;
-            m_arrEnemy[i].transform.localPosition = new Vector3(0, 0, (-5 * i) - 3);
-            
-//            m_arrEnemy[i].
-        }
-
-        // m_arrEnemy[0].GetComponent<CEnemy>().PlayEnemy();
     }
 
     // Update is called once per frame
     void Update()
     {
         
+    }
+
+    public void InitEnemy(CTowerInfo cTowerInfo)
+    {
+        m_nEnemyCount = Random.Range(cTowerInfo.GetMinCount(), cTowerInfo.GetMaxCount());
+
+        Debug.Log("Enemy Count : " + m_nEnemyCount);
+
+        for(int i = 0; i < m_nEnemyCount; i++)
+        {
+            int nEnemyGrade = Random.Range(cTowerInfo.GetMinGrade(), cTowerInfo.GetMaxGrade());
+            CEnemyInfo cEnemyInfo = CGameInfo.Instance.GetEnemyRandomGrade(nEnemyGrade);
+            CWeaponInfo cWeaponInfo = CGameInfo.Instance.GetWeaponInfo(cEnemyInfo.GetWeapon());
+            int nHP = CGameInfo.Instance.GetHPByUnitInfo(cEnemyInfo.GetUnitIndex(), cEnemyInfo.GetLevel());
+
+            m_arrEnemy[i] = Instantiate(Resources.Load<GameObject>("Prefabs/Enemys/enemys"));
+            m_arrEnemy[i].transform.parent = m_goEnemyRoot.transform;
+            // m_arrEnemy[i].transform.localPosition = new Vector3(0, 0, (-5 * i) - 3);
+
+            m_arrEnemy[i].transform.localPosition = new Vector3(0, 0, 99);
+            
+            if( i == 0 )
+                m_arrEnemy[i].transform.localPosition = new Vector3(0, 0, -3);
+
+            
+            m_arrEnemy[i].GetComponent<CCharacter>().InitCharacter(DefineData.CHARACTER_TYPE_ENEMY, cEnemyInfo.GetUnitIndex(), cEnemyInfo.GetLevel(), nHP, new CWeaponEX(cWeaponInfo, null));
+            
+//            m_arrEnemy[i].
+        }
     }
 
     public GameObject GetEnemyGameObject(int nIndex)
@@ -86,6 +105,19 @@ public class CEnemysManager : MonoBehaviour
     public int GetState(int nIndex)
     {
         return m_arrEnemy[nIndex].GetComponent<CEnemy>().GetState();
+    }
+
+    public int NextTarget(Vector3 vecPlayerPoz)
+    {
+        m_nTargetEnemyIndex++;
+
+        if( m_nTargetEnemyIndex >= GetEnemyCount() )
+            return -1;
+            
+        Vector3 vecEnmeyPoz = vecPlayerPoz;
+        vecEnmeyPoz.z -= 5;
+        m_arrEnemy[m_nTargetEnemyIndex].transform.position = vecEnmeyPoz;
+        return m_nTargetEnemyIndex;
     }
 
     public float DamageEnemy(int nIndex, float fDamage, bool bIsCritical = false)

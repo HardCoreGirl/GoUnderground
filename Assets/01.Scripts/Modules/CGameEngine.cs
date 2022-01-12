@@ -37,6 +37,8 @@ public class CGameEngine : MonoBehaviour
 
     private Vector3 m_vecOriginCameraPoz;
 
+    private CWeaponEX m_cWeaponEX;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -45,6 +47,8 @@ public class CGameEngine : MonoBehaviour
         // Vector3 vecGamePoz = m_vecOriginCameraPoz;
         // vecGamePoz.z += 1f;
         // Camera.main.transform.localPosition = vecGamePoz;
+
+        Debug.Log(string.Format("{0} 테스트입니다.", 20));
     }
 
     // Update is called once per frame
@@ -59,7 +63,19 @@ public class CGameEngine : MonoBehaviour
 
     public void GameStart()
     {
+        int nLevel = int.Parse(CUIInGameManager.Instance.m_ifUserLevel.text);
+        int nHP = CGameInfo.Instance.GetHPByUnitInfo(0, nLevel);
+
+        CTowerInfo cTowerInfo = CGameInfo.Instance.GetTowerInfo(1, DefineData.TEST_FLOOR);
+
+        CEnemysManager.Instance.InitEnemy(cTowerInfo);
         // CPlayer.Instance.PlayPlayer();   
+
+        Debug.Log("User Level : " + nLevel);
+        
+        CWeaponInfo cWeaponInfo = CGameInfo.Instance.GetWeaponInfo(DefineData.TEST_MY_WEAPON_INDEX);
+
+        m_goPlayer.GetComponent<CCharacter>().InitCharacter(DefineData.CHARACTER_TYPE_PLAYER, 0, nLevel, nHP, m_cWeaponEX);
         m_goPlayer.GetComponent<CCharacter>().SetTarget(CEnemysManager.Instance.GetEnemyGameObject(0));
         m_goPlayer.GetComponent<CCharacter>().Attack();
     }
@@ -78,5 +94,10 @@ public class CGameEngine : MonoBehaviour
     public GameObject GetPlayer()
     {
         return m_goPlayer;
+    }
+
+    public void SetWeaponEX(CWeaponEX cWeaponEX)
+    {
+        m_cWeaponEX = cWeaponEX;
     }
 }
