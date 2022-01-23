@@ -39,6 +39,8 @@ public class CGameEngine : MonoBehaviour
 
     private CWeaponEX m_cWeaponEX;
 
+    private int m_nPlayState;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -48,7 +50,8 @@ public class CGameEngine : MonoBehaviour
         // vecGamePoz.z += 1f;
         // Camera.main.transform.localPosition = vecGamePoz;
 
-        Debug.Log(string.Format("{0} 테스트입니다.", 20));
+        // Debug.Log(string.Format("{0} 테스트입니다.", 20));
+        
     }
 
     // Update is called once per frame
@@ -63,7 +66,8 @@ public class CGameEngine : MonoBehaviour
 
     public void GameStart()
     {
-        int nLevel = int.Parse(CUIInGameManager.Instance.m_ifUserLevel.text);
+        // int nLevel = int.Parse(CUIInGameManager.Instance.m_ifUserLevel.text);
+        int nLevel = 3;
         int nHP = CGameInfo.Instance.GetHPByUnitInfo(0, nLevel);
 
         CTowerInfo cTowerInfo = CGameInfo.Instance.GetTowerInfo(1, DefineData.TEST_FLOOR);
@@ -78,6 +82,8 @@ public class CGameEngine : MonoBehaviour
         m_goPlayer.GetComponent<CCharacter>().InitCharacter(DefineData.CHARACTER_TYPE_PLAYER, 0, nLevel, nHP, m_cWeaponEX);
         m_goPlayer.GetComponent<CCharacter>().SetTarget(CEnemysManager.Instance.GetEnemyGameObject(0));
         m_goPlayer.GetComponent<CCharacter>().Attack();
+
+        CUIInGameManager.Instance.SetState(DefineData.INGAME_PLAY);
     }
 
     public void PlaySkill(int nIndex)
