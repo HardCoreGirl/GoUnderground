@@ -2,7 +2,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+
+using TMPro;
+
+using DG.Tweening;
+
+
 
 public class CUIInGameManager : MonoBehaviour
 {
@@ -38,20 +45,30 @@ public class CUIInGameManager : MonoBehaviour
     public GameObject[] m_arrUIBoard = new GameObject[2];
     public CPopupText m_cPopupText;
 
-    public Text m_txtHP;
-
-    public Image m_imgHP;
+    public TextMeshProUGUI m_tmpHP;
+    public Slider m_sliderHP;
 
     public InputField m_ifUserLevel;
+
+    public GameObject m_goCutin;
+
+    public GameObject m_goBossWarning;
+
+    public GameObject[] m_arrResult = new GameObject[2];
 
     private int m_nState = 0;   
 
     #region Board Dev
+    public GameObject m_goBtnStart;
+
     public Text m_txtWeaponName;
     public Text m_txtWeaponDamage;
     public Text m_txtWeaponLevel;
 
     public Text[] m_arrWeaponOption = new Text[4];
+
+    public TextMeshProUGUI m_tmpWeaponDamage;    
+    public TextMeshProUGUI[] m_arrWeaponOptions = new TextMeshProUGUI[4];
 
     private CWeaponEX m_cWeaponEX;
     #endregion
@@ -63,12 +80,18 @@ public class CUIInGameManager : MonoBehaviour
 
         ShowBoard(DefineData.UI_INGAME_BOARD_DEV);
         InitDevBoard();
+
+        HideResult();
+        m_goCutin.SetActive(false);
+        m_goBossWarning.SetActive(false);
+
+        m_goBtnStart.SetActive(false);
     }
 
     // Update is called once per frame
     void Update()
     {
-        if( m_nState != DefineData.INGAME_PLAY )
+        if( m_nState == DefineData.INGAME_READY )
             return;
 
         float fMaxHP = CGameEngine.Instance.GetPlayer().GetComponent<CCharacter>().GetMaxHP();
@@ -78,10 +101,10 @@ public class CUIInGameManager : MonoBehaviour
         if(fRemainHP >= 1)
             fRemainHP = 1f;
 
-        m_imgHP.fillAmount = fRemainHP;
+        m_sliderHP.value = fRemainHP;
 
         string strHP = ((int)fHP).ToString() + " / " + ((int)fMaxHP).ToString();
-        m_txtHP.text = strHP;
+        m_tmpHP.text = strHP;
         /*
         float fMaxHP = CPlayer.Instance.GetMaxHP();
         float fHP = CPlayer.Instance.GetHP();
@@ -89,8 +112,6 @@ public class CUIInGameManager : MonoBehaviour
 
         if(fRemainHP >= 1)
             fRemainHP = 1f;
-
-        m_imgHP.fillAmount = fRemainHP;
         */
     }
 
@@ -117,9 +138,69 @@ public class CUIInGameManager : MonoBehaviour
         // inst.transform.position = new Vector3(0, 0, 0);
     }
 
+    public void ShowCutin()
+    {
+        StartCoroutine("ProcessCutin");
+    }
+
+    IEnumerator ProcessCutin()
+    {
+        m_goCutin.SetActive(true);
+        m_goCutin.GetComponent<Image>().DOFade(1f, 1f);
+
+        yield return new WaitForSeconds(2f);
+
+        m_goCutin.GetComponent<Image>().DOFade(0f, 0.5f);
+        m_goCutin.SetActive(false);
+    }
+
+    public void ShowBossWarning()
+    {
+        StartCoroutine("ProcessShowBossWarning");
+    }
+
+    IEnumerator ProcessShowBossWarning()
+    {
+        yield return new WaitForSeconds(2f);
+        m_goBossWarning.SetActive(true);
+        yield return new WaitForSeconds(1f);
+        m_goBossWarning.SetActive(false);
+    }
+
+    public void ShowResult()
+    {
+        HideResult();
+
+        if( m_nState == DefineData.INGAME_SUCCESS )
+        {
+            m_arrResult[0].SetActive(true);
+        } else if ( m_nState == DefineData.INGAME_FAIL )
+        {
+            m_arrResult[1].SetActive(true);
+        }
+    }
+
+    public void HideResult()
+    {
+        for(int i = 0; i < m_arrResult.Length; i++)
+        {
+            m_arrResult[i].SetActive(false);
+        }
+    }
+
+    public void SetState(int nState)
+    {
+        m_nState = nState;
+    }
+
+    public int GetState()
+    {
+        return m_nState;
+    }
+
     public void OnClickPlay()
     {
-        m_nState = DefineData.INGAME_PLAY;
+        ShowBoard(DefineData.UI_INGAME_BOARD_PLAYING);
         CGameEngine.Instance.GameStart();
     }
 
@@ -132,9 +213,12 @@ public class CUIInGameManager : MonoBehaviour
     #region Board Dev
     public void OnClickChangeWeapon()
     {
+        m_goBtnStart.SetActive(true);
+
         for(int i = 0; i < m_arrWeaponOption.Length; i++)
         {
             m_arrWeaponOption[i].text = "";
+            m_arrWeaponOptions[i].text = "";
         }
 
         List<int> listOption = CGameInfo.Instance.GetOptionList(1);
@@ -152,10 +236,11 @@ public class CUIInGameManager : MonoBehaviour
         for(int i = 0; i < listOption.Count; i++)
         {
             COptionInfo cOptionInfo = CGameInfo.Instance.GetOptionInfo(listOption[i]);
-            Debug.Log("Option Index : " + listOption[i]);
+            // Debug.Log("Option Index : " + listOption[i]);
             int nRandomValue = Random.Range((int)cOptionInfo.GetValue(0), (int)cOptionInfo.GetValue(1) + 1);
             string strOptionMsg = string.Format(cOptionInfo.GetOptionMsg(), nRandomValue);
             m_arrWeaponOption[i].text = strOptionMsg;
+            m_arrWeaponOptions[i].text = strOptionMsg;
 
             listFinalOption.Add(new CFinalOption(cOptionInfo.GetOptionIndex(), cOptionInfo.GetOptionType(), (float)nRandomValue));
 
@@ -177,6 +262,12 @@ public class CUIInGameManager : MonoBehaviour
         CGameEngine.Instance.SetWeaponEX(cWeaponEX);
 
         m_txtWeaponDamage.text = "피해: " + nOptionMinDamage.ToString() + " - " + nOptionMaxDamage.ToString();
+        m_tmpWeaponDamage.text = "Damage: " + nOptionMinDamage.ToString() + " - " + nOptionMaxDamage.ToString();
+    }
+
+    public void OnClickRestart()
+    {
+        SceneManager.LoadScene("InGame");
     }
 
     public void InitDevBoard()

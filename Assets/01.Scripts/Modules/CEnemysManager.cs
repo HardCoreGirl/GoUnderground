@@ -38,9 +38,13 @@ public class CEnemysManager : MonoBehaviour
 
     GameObject[] m_arrEnemy = new GameObject[30];
 
+    GameObject m_goBoss;
+
     int m_nEnemyCount = 0;
 
     private int m_nTargetEnemyIndex = 0;
+
+    private bool m_bIsShowBoss = false;
 
     // Start is called before the first frame update
     void Start()
@@ -55,7 +59,8 @@ public class CEnemysManager : MonoBehaviour
 
     public void InitEnemy(CTowerInfo cTowerInfo)
     {
-        m_nEnemyCount = Random.Range(cTowerInfo.GetMinCount(), cTowerInfo.GetMaxCount());
+        // m_nEnemyCount = Random.Range(cTowerInfo.GetMinCount(), cTowerInfo.GetMaxCount());
+        m_nEnemyCount = 1;
 
         Debug.Log("Enemy Count : " + m_nEnemyCount);
 
@@ -80,11 +85,31 @@ public class CEnemysManager : MonoBehaviour
             
 //            m_arrEnemy[i].
         }
+
+        // Boss Loading ---
+        CBossInfo cBossInfo = CGameInfo.Instance.GetBossInfo(1);
+        Debug.Log("BossIndex : " + cBossInfo.GetIndex());
+        Debug.Log("BossUnitIndex : " + cBossInfo.GetUnitIndex());
+        Debug.Log("BossWeapon : " + cBossInfo.GetWeapon());
+        
+        CWeaponInfo cBossWeaponInfo = CGameInfo.Instance.GetWeaponInfo(cBossInfo.GetWeapon());
+        int nBossHP = CGameInfo.Instance.GetHPByUnitInfo(cBossInfo.GetUnitIndex(), cBossInfo.GetLevel());
+        m_goBoss = Instantiate(Resources.Load<GameObject>("Prefabs/Enemys/Enemy_9000"));
+        m_goBoss.transform.parent = m_goEnemyRoot.transform;
+
+        m_goBoss.transform.localPosition = new Vector3(0, 0, 99);
+
+        m_goBoss.GetComponent<CCharacter>().InitCharacter(DefineData.CHARACTER_TYPE_ENEMY, cBossInfo.GetUnitIndex(), cBossInfo.GetLevel(), nBossHP, new CWeaponEX(cBossWeaponInfo, null));
     }
 
     public GameObject GetEnemyGameObject(int nIndex)
     {
         return m_arrEnemy[nIndex];
+    }
+
+    public GameObject GetBossGameObject()
+    {
+        return m_goBoss;
     }
 
     public int GetEnemyCount()
@@ -111,10 +136,25 @@ public class CEnemysManager : MonoBehaviour
     {
         m_nTargetEnemyIndex++;
 
-        if( m_nTargetEnemyIndex >= GetEnemyCount() )
-            return -1;
-            
         Vector3 vecEnmeyPoz = vecPlayerPoz;
+
+        if( m_nTargetEnemyIndex >= GetEnemyCount() )
+        {
+            // TODO : HardCoreGandhi 220119 - 보스 유무 체크 - 현재 하드 코딩이라서 무조건 생성
+            // if( boss )
+            if( !m_bIsShowBoss )    // 보수 출연 여부
+            {
+                vecEnmeyPoz.z -= 10;
+                m_goBoss.transform.position = vecEnmeyPoz;
+                m_bIsShowBoss = true;
+
+                return 999; // 보스 출연히 타겟이 999
+            }
+
+            return -1;
+            // return -1;
+        }
+
         vecEnmeyPoz.z -= 5;
         m_arrEnemy[m_nTargetEnemyIndex].transform.position = vecEnmeyPoz;
         return m_nTargetEnemyIndex;

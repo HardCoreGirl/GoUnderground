@@ -23,7 +23,13 @@ static class DefineData
     // InGame State ----
     public static int INGAME_READY = 0;
     public static int INGAME_PLAY = 1;
+    public static int INGAME_BOSS = 2;
+
+    public static int INGAME_SUCCESS = 3;
+    public static int INGAME_FAIL = 4;
     // -----------------
+
+    
 
     public static int CHARACTER_TYPE_PLAYER = 0;
     public static int CHARACTER_TYPE_ENEMY = 10;

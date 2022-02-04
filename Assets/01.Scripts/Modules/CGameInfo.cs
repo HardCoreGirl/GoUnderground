@@ -43,6 +43,8 @@ public class CGameInfo : MonoBehaviour
 
     IDictionary<int, CEnemyInfo> m_dicEnemy;
 
+    IDictionary<int, CBossInfo> m_dicBoss;
+
     IDictionary<int, COptionInfo> m_dicOption;
 
     // Start is called before the first frame update
@@ -53,6 +55,7 @@ public class CGameInfo : MonoBehaviour
         LoadOptionInfo();
         LoadTowerInfo();
         LoadEnemyInfo();
+        LoadBossInfo();
 
         m_dicSkill = new Dictionary<int, CSkillInfo>();
 
@@ -61,6 +64,7 @@ public class CGameInfo : MonoBehaviour
         // Slash
         cSkillInfo.nSkillIndex = 1;
         cSkillInfo.nSkillType = DefineData.SKILL_STATE_NO_HIT_NO_CANCEL;
+        cSkillInfo.fCutinTime = 2f;
         cSkillInfo.fSkillTime = 2.5f;
         cSkillInfo.fSkillValue[0] = 3f; // 데미지 업 ( 기본 데미지 * 3 )
         cSkillInfo.fSkillValue[1] = 1f; // 스턴 시간
@@ -71,6 +75,7 @@ public class CGameInfo : MonoBehaviour
         // 힐
         cSkillInfo.nSkillIndex = 20000;
         cSkillInfo.nSkillType = DefineData.SKILL_STATE_HIT_NO_CANCEL;
+        cSkillInfo.fCutinTime = 2f;
         cSkillInfo.fSkillTime = 2.5f;
         cSkillInfo.fSkillValue[0] = 1000f;
         cSkillInfo.fSkillValue[1] = 0;
@@ -344,6 +349,44 @@ public class CGameInfo : MonoBehaviour
     }
     #endregion
 
+     #region BossInfo
+    public void LoadBossInfo()
+    {
+        List<Dictionary<string, object>> data = CSVReader.Read("Tables/boss_info");
+        int nCount = data.Count;
+
+        m_dicBoss = new Dictionary<int, CBossInfo>();
+
+
+
+        for(int i = 0; i < nCount; i++)
+        {
+            Debug.Log("Boss Weapon !!! : " + data[i]["boss_weapon"] );
+            m_dicBoss.Add((int)data[i]["boss_index"], 
+                            new CBossInfo((int)data[i]["boss_index"], 
+                                                (int)data[i]["unit_index"], 
+                                                (int)data[i]["get_exp"], 
+                                                (int)data[i]["get_gold"],
+                                                (int)data[i]["boss_level"],
+                                                (int)data[i]["boss_weapon"],
+                                                (int)data[i]["boss_shield"],
+                                                (int)data[i]["boss_helmet"],
+                                                (int)data[i]["boss_armor"]));
+        }
+    }
+
+    public CBossInfo GetBossInfo(int nIndex)
+    {
+        CBossInfo cBossInfo;
+        if(m_dicBoss.TryGetValue(nIndex, out cBossInfo))
+        {
+            return cBossInfo;
+        }
+
+        return null;
+    }
+    #endregion
+
     #region SkillInfo
     public CSkillInfo GetSkillInfo(int nIndex)
     {
@@ -510,6 +553,9 @@ public class CSkillInfo
 {
     public int nSkillIndex = 0;
     public int nSkillType = 0;
+
+    public float fCutinTime = 0;
+
     public float fSkillTime = 0;
 
     public float[] fSkillValue = new float[3];
@@ -522,6 +568,11 @@ public class CSkillInfo
     public int GetSkillType()
     {
         return nSkillType;
+    }
+
+    public float GetCutinTime()
+    {
+        return fCutinTime;
     }
 
     public float GetSkillTime()
@@ -645,6 +696,58 @@ public class CEnemyInfo
     public int GetGrade()
     {
         return m_nGrade;
+    }
+
+    public int GetUnitIndex()
+    {
+        return m_nUnitIndex;
+    }
+
+    public int GetExp()
+    {
+        return m_nGetExp;
+    }
+
+    public int GetGold()
+    {
+        return m_nGetGold;
+    }
+
+    public int GetLevel()
+    {
+        return m_nLevel;
+    }
+
+    public int GetWeapon()
+    {
+        return m_nWeapon;
+    }
+}
+#endregion
+
+#region BossInfo
+public class CBossInfo
+{
+    public int m_nIndex;
+    public int m_nUnitIndex;
+    public int m_nGetExp;
+    public int m_nGetGold;
+    public int m_nLevel;
+    public int m_nWeapon;
+
+    public CBossInfo(int nIndex, int nUnitIndex, int nGetExp, int nGetGold, int nLevel, int nWeapon, int nShield = 0, int nHelmet = 0, int nArmor = 0)
+    {
+        m_nIndex = nIndex;
+        m_nUnitIndex = nUnitIndex;
+        m_nGetExp = nGetExp;
+        m_nGetGold = nGetGold;
+        m_nLevel = nLevel;
+        m_nWeapon = nWeapon;
+    }
+
+    public int GetIndex()
+    {
+        return m_nIndex;
     }
 
     public int GetUnitIndex()

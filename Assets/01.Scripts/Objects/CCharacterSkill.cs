@@ -26,6 +26,8 @@ public class CCharacterSkill : MonoBehaviour
     public void PlaySkill(int nIndex)
     {
         Debug.Log("PlaySkill !!!!!!!!!!!!!!!");
+        CUIInGameManager.Instance.ShowCutin();
+        
         m_nPlayingSkill = nIndex;
 
         string strSkillFuncName = "ProcessSkill" + nIndex.ToString("00000");

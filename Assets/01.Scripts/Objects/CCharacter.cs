@@ -228,14 +228,28 @@ public class CCharacter : MonoBehaviour
                             {
                                 // 클리어
                                 Debug.Log("Game Clear !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                                CUIInGameManager.Instance.SetState(DefineData.INGAME_SUCCESS);
+                                CUIInGameManager.Instance.ShowResult();
                                 break;
+                            } else if( nTarget == 999 ) // 보스출현
+                            {
+                                CUIInGameManager.Instance.ShowBossWarning();
+                                SetTarget(CEnemysManager.Instance.GetBossGameObject());
+                            } else {
+                                SetTarget(CEnemysManager.Instance.GetEnemyGameObject(nTarget));
                             }
-                            SetTarget(CEnemysManager.Instance.GetEnemyGameObject(nTarget));
+
+                            yield return new WaitForSeconds(GetAttackFinishInterval());
+                            Run();
+                            break;
+                        } else {
+                            yield return new WaitForSeconds(GetAttackFinishInterval());
+                             
+                            CUIInGameManager.Instance.SetState(DefineData.INGAME_FAIL);
+                            CUIInGameManager.Instance.ShowResult();
+                            // Game Over
+                            break;
                         }
-                        // 상대방이 죽었다면
-                        yield return new WaitForSeconds(GetAttackFinishInterval());
-                        Run();
-                        break;
                     }
                 }
                 else 
@@ -339,6 +353,11 @@ public class CCharacter : MonoBehaviour
             if( fDist < 0 )
                 fDist += -1;
 
+            if(CUIInGameManager.Instance.GetState() == DefineData.INGAME_BOSS )
+            {
+                if( fDist < DefineData.FIGHT_DISTANCE * 0.4 )
+                    break;
+            }
             if( fDist < DefineData.FIGHT_DISTANCE )
             {
                 break;
